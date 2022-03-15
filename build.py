@@ -331,7 +331,7 @@ def build_binary(args):
         flag += ' B_TEST=1'
 
     if flag:
-        run_ndk_build(flag + ' B_SHARED=1')
+        run_ndk_build(f'{flag} B_SHARED=1')
 
     if 'magisk' in args.target:
         clean_elf()
@@ -359,8 +359,14 @@ def build_binary(args):
 def build_apk(args, module):
     build_type = 'Release' if args.release or module == 'stub' else 'Debug'
 
-    proc = execv([gradlew, f'{module}:assemble{build_type}',
-                  '-PconfigPath=' + op.abspath(args.config)])
+    proc = execv(
+        [
+            gradlew,
+            f'{module}:assemble{build_type}',
+            f'-PconfigPath={op.abspath(args.config)}',
+        ]
+    )
+
     if proc.returncode != 0:
         error(f'Build {module} failed!')
 
@@ -370,7 +376,7 @@ def build_apk(args, module):
     source = op.join(module, 'build', 'outputs', 'apk', build_type, apk)
     target = op.join(config['outdir'], apk)
     mv(source, target)
-    header('Output: ' + target)
+    header(f'Output: {target}')
 
 
 def build_app(args):
@@ -470,7 +476,7 @@ def patch_avd_ramdisk(args):
     header('* Patching emulator ramdisk.img')
 
     # Create a backup to prevent accidental overwrites
-    backup = args.ramdisk + '.bak'
+    backup = f'{args.ramdisk}.bak'
     if not op.exists(backup):
         cp(args.ramdisk, backup)
 
@@ -481,7 +487,7 @@ def patch_avd_ramdisk(args):
     # Need to turn off system as root
     if 'SystemAsRoot = on' in adv_ft:
         # Create a backup
-        cp(ini, ini + '.bak')
+        cp(ini, f'{ini}.bak')
         adv_ft = adv_ft.replace('SystemAsRoot = on', 'SystemAsRoot = off')
         with open(ini, 'w') as f:
             f.write(adv_ft)
