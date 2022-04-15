@@ -10,11 +10,8 @@ class JType:
 
 class JArray(JType):
     def __init__(self, type):
-        if type.cpp in primitives:
-            name = type.cpp + 'Array'
-        else:
-            name = 'jobjectArray'
-        super().__init__(name, '[' + type.jni)
+        name = f'{type.cpp}Array' if type.cpp in primitives else 'jobjectArray'
+        super().__init__(name, f'[{type.jni}')
 
 
 class Argument:
@@ -94,15 +91,15 @@ class ForkAndSpec(JNIHook):
         decl += ind(1) + self.init_args()
         for a in self.args:
             if a.set_arg:
-                decl += ind(1) + f'args.{a.name} = &{a.name};'
-        decl += ind(1) + 'HookContext ctx;'
-        decl += ind(1) + 'ctx.env = env;'
-        decl += ind(1) + 'ctx.raw_args = &args;'
-        decl += ind(1) + f'ctx.{self.base_name()}_pre();'
+                decl += f'{ind(1)}args.{a.name} = &{a.name};'
+        decl += f'{ind(1)}HookContext ctx;'
+        decl += f'{ind(1)}ctx.env = env;'
+        decl += f'{ind(1)}ctx.raw_args = &args;'
+        decl += f'{ind(1)}ctx.{self.base_name()}_pre();'
         decl += ind(1) + self.orig_method() + '('
-        decl += ind(2) + f'env, clazz, {self.name_list()}'
-        decl += ind(1) + ');'
-        decl += ind(1) + f'ctx.{self.base_name()}_post();'
+        decl += f'{ind(2)}env, clazz, {self.name_list()}'
+        decl += f'{ind(1)});'
+        decl += f'{ind(1)}ctx.{self.base_name()}_post();'
         return decl
 
 class SpecApp(ForkAndSpec):
